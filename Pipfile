@@ -13,6 +13,8 @@ asyncpg = "*"
 celery = "*"
 redis = "*"
 gevent = "*"
+requests = "*"
+pydantic = "*"
 
 [dev-packages]
 

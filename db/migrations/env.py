@@ -10,7 +10,7 @@ from alembic import context
 sys.path = ["", ".."] + sys.path[1:]
 
 from settings import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER  # noqa: E402
-from app.models import Base  # noqa: E402
+from apps.image.models import Base  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

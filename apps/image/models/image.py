@@ -12,6 +12,6 @@ class Image(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     file_path: Mapped[str] = mapped_column(String(255), nullable=False)
-    image_type: Mapped[ImageTypes] = mapped_column()
+    type: Mapped[ImageTypes] = mapped_column(server_default=ImageTypes.DOG)
 
     created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), server_default=func.now())
