@@ -1,0 +1,2 @@
+class DownloadImageService:
+    pass
