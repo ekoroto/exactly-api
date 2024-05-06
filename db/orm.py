@@ -11,6 +11,7 @@ Base = declarative_base()
 
 engine = create_async_engine(
     f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}",
+    echo=False,
     pool_size=100,
     max_overflow=0,
 )

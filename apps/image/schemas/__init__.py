@@ -1,7 +1,8 @@
-from .image_schema import ImageSchema, ImageForCreateSchema
+from .image_schema import ImageSchema, ImageForCreateSchema, ImageWithUrlSchema
 
 
 __all__ = (
     'ImageSchema',
+    'ImageWithUrlSchema',
     'ImageForCreateSchema',
 )

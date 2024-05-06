@@ -3,24 +3,28 @@ import requests
 
 from datetime import datetime
 
+from settings import EXACTLY_RETRIEVE_IMAGE_URL
+from core.exceptions import AddImageMinioException
+from core.services import MinioClient
 from ..schemas import ImageForCreateSchema
 from ..storages import ImageStorage
 from ..exceptions import DownloadImageException
-from ..types import ImageTypes
-
-from settings import EXACTLY_RETRIEVE_IMAGE_URL, PUBLIC_IMAGES_PATH
 
 
 class DownloadImageService:
-    def __init__(self, image_storage: ImageStorage) -> None:
+    def __init__(self, image_storage: ImageStorage, minio_client: MinioClient) -> None:
         self.image_storage = image_storage
+        self.minio_client = minio_client
 
     async def get_and_save_image(self):
         content = self._get_image()
-        file_path = self._create_file_from_bytes(content)
+        bucket_path = self._upload_file_to_bucket(content)
         #TODO: identify is it dog or cat
-        image_type = ImageTypes.DOG
-        await self.image_storage.create(ImageForCreateSchema(file_path=file_path, type=image_type))
+
+        if not bucket_path:
+            raise DownloadImageException()
+
+        await self.image_storage.create(ImageForCreateSchema(file_path=bucket_path))
 
     @staticmethod
     def _get_image() -> bytes:
@@ -32,13 +36,13 @@ class DownloadImageService:
 
         return response.content
 
-    @staticmethod
-    def _create_file_from_bytes(content: bytes) -> str:
-        # We believe that this is a test demo and it is quite simple to store files locally without using the clouds.
+    def _upload_file_to_bucket(self, content: bytes) -> str | None:
+        filename = f'image_{int(datetime.now().timestamp())}.png'
         decoded_content = base64.b64decode(content)
-        filename = f'{PUBLIC_IMAGES_PATH}/image_{int(datetime.now().timestamp())}.png'
 
-        with open(filename, 'wb') as f:
-            f.write(decoded_content)
+        try:
+            self.minio_client.upload_image(filename, decoded_content)
+        except AddImageMinioException:
+            return None
 
         return filename

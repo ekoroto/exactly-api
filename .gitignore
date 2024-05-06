@@ -131,3 +131,4 @@ dmypy.json
 
 celerybeat-schedule.db
 public/images/*
+.vscode
