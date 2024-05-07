@@ -1,5 +1,26 @@
 # exactly-api
 
+This is a FastAPI application for receiving, saving and sending images of cats and dogs. General steps of the application:
+1. To receive pictures from a third-party service, we use celery beat, scheduled for retrieving the image every 2 minutes.
+2. After receiving an image, it goes through a recognition process into one of three categories: `cat`, `dog`, `not recognized`. Recognition occurs using a `local pre-trained ML model VGG16`.
+3. Then it saves the image in `Minio storage` and stores the bucket path in the corresponding entry in the PostgreSQL database.
+4. `<host>:<port>/images/` endpoint returns the last 10 images with the following structure:
+
+```
+[
+    {
+        "id": 1,
+        "type": "CAT",
+        "file_path": <file_path>,
+        "created_at": "2024-05-06T17:18:56.087145Z",
+        "url": <minio_url>
+    },
+    ...
+]
+```
+
+## Installation
+
 1. Clone the repository
 2. Install requirements with dev requirements via pipenv `pipenv sync`.
 3. Fill `.env` file based on `.env.example`
