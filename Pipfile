@@ -17,6 +17,10 @@ requests = "*"
 pydantic = "*"
 minio = "*"
 gunicorn = "*"
+numpy = "*"
+tensorflow = "*"
+keras = "*"
+pillow = "*"
 
 [dev-packages]
 

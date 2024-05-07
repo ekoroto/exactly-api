@@ -42,7 +42,7 @@ class MinioClient():
     def get_image_url(self, image_name: str) -> str:
         try:
             presigned_url = self.client.presigned_get_object(
-                self._bucket_name, image_name, expires=timedelta(hours=FILE_STORAGE_MINIO_EXPIRATION_HOURS)
+                self._bucket_name, image_name, expires=timedelta(hours=2)
             )
 
             return presigned_url

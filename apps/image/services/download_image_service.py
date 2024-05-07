@@ -5,26 +5,40 @@ from datetime import datetime
 
 from settings import EXACTLY_RETRIEVE_IMAGE_URL
 from core.exceptions import AddImageMinioException
-from core.services import MinioClient
+from core.services import ImageClassificationService, MinioClient
+from ..constants import BREEDS_CATALOG
+from ..exceptions import DownloadImageException
 from ..schemas import ImageForCreateSchema
 from ..storages import ImageStorage
-from ..exceptions import DownloadImageException
+from ..types import ImageTypes
 
 
 class DownloadImageService:
-    def __init__(self, image_storage: ImageStorage, minio_client: MinioClient) -> None:
+    def __init__(
+        self,
+        image_storage: ImageStorage,
+        minio_client: MinioClient,
+        image_classification_service: ImageClassificationService,
+    ) -> None:
         self.image_storage = image_storage
         self.minio_client = minio_client
+        self.image_classification_service = image_classification_service
 
     async def get_and_save_image(self):
         content = self._get_image()
+        content = base64.b64decode(content)
+ 
+        type = self.image_classification_service.predict(content, [ImageTypes.CAT, ImageTypes.DOG], BREEDS_CATALOG)
+
+        if not type:
+            type = ImageTypes.NOT_RECOGNIZED
+
         bucket_path = self._upload_file_to_bucket(content)
-        #TODO: identify is it dog or cat
 
         if not bucket_path:
             raise DownloadImageException()
 
-        await self.image_storage.create(ImageForCreateSchema(file_path=bucket_path))
+        await self.image_storage.create(ImageForCreateSchema(file_path=bucket_path, type=type))
 
     @staticmethod
     def _get_image() -> bytes:
@@ -38,10 +52,9 @@ class DownloadImageService:
 
     def _upload_file_to_bucket(self, content: bytes) -> str | None:
         filename = f'image_{int(datetime.now().timestamp())}.png'
-        decoded_content = base64.b64decode(content)
 
         try:
-            self.minio_client.upload_image(filename, decoded_content)
+            self.minio_client.upload_image(filename, content)
         except AddImageMinioException:
             return None
 

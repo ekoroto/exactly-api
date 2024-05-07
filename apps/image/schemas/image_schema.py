@@ -7,7 +7,7 @@ from ..types import ImageTypes
 
 class ImageForCreateSchema(BaseModel):
     file_path: str
-    type: ImageTypes = ImageTypes.DOG
+    type: ImageTypes
 
 
 class ImageSchema(ImageForCreateSchema):
